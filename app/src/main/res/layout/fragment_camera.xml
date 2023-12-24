@@ -40,4 +40,5 @@
         android:background="@color/mp_color_primary"
         app:layout_anchor="@id/recyclerview_results"
         app:layout_anchorGravity="bottom" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
