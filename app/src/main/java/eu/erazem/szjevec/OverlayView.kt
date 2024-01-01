@@ -1,6 +1,7 @@
 package eu.erazem.szjevec
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -46,28 +47,30 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.style = Paint.Style.FILL
     }
 
+
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
         results?.let { gestureRecognizerResult ->
-            for(landmark in gestureRecognizerResult.landmarks()) {
-                for(normalizedLandmark in landmark) {
-                    canvas.drawPoint(
-                        normalizedLandmark.x() * imageWidth * scaleFactor,
-                        normalizedLandmark.y() * imageHeight * scaleFactor,
-                        pointPaint)
+            for (landmark in gestureRecognizerResult.landmarks()) {
+                for (normalizedLandmark in landmark) {
+                    val x = normalizedLandmark.x() * imageWidth * scaleFactor
+                    val y = normalizedLandmark.y() * imageHeight * scaleFactor
+                    canvas.drawPoint(x, y, pointPaint)
                 }
 
                 HandLandmarker.HAND_CONNECTIONS.forEach {
-                    canvas.drawLine(
-                        gestureRecognizerResult.landmarks().get(0).get(it!!.start()).x() * imageWidth * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(it.start()).y() * imageHeight * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(it.end()).x() * imageWidth * scaleFactor,
-                        gestureRecognizerResult.landmarks().get(0).get(it.end()).y() * imageHeight * scaleFactor,
-                        linePaint)
+                    val startX = gestureRecognizerResult.landmarks()[0][it!!.start()].x() * imageWidth * scaleFactor
+                    val startY = gestureRecognizerResult.landmarks()[0][it.start()].y() * imageHeight * scaleFactor
+                    val endX = gestureRecognizerResult.landmarks()[0][it.end()].x() * imageWidth * scaleFactor
+                    val endY = gestureRecognizerResult.landmarks()[0][it.end()].y() * imageHeight * scaleFactor
+
+                    canvas.drawLine(startX, startY, endX, endY, linePaint)
                 }
             }
         }
     }
+
+
 
     fun setResults(
         gestureRecognizerResult: GestureRecognizerResult,

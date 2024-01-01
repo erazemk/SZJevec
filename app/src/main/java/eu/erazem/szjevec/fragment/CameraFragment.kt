@@ -39,7 +39,6 @@ class CameraFragment : Fragment(),
     }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
-
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
@@ -55,15 +54,18 @@ class CameraFragment : Fragment(),
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
-    private var cameraFacing = CameraSelector.LENS_FACING_FRONT
+    private var cameraFacing = CameraSelector.LENS_FACING_BACK
 
-    /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
+
+    // Flag to track if the camera is running
+    private var isCameraRunning = false
+
+    // Flag to track if the "Start" button has been clicked
+    private var isStartButtonClicked = false
 
     override fun onResume() {
         super.onResume()
-        // Make sure that all permissions are still present, since the
-        // user could have removed them while the app was in paused state.
         if (!PermissionsFragment.hasPermissions(requireContext())) {
             Navigation.findNavController(
                 requireActivity(), R.id.fragment_container
@@ -76,6 +78,11 @@ class CameraFragment : Fragment(),
             if (gestureRecognizerHelper.isClosed()) {
                 gestureRecognizerHelper.setupGestureRecognizer()
             }
+        }
+
+        // Start the camera if it should be running
+        if (isVisible) {
+            startCamera()
         }
     }
 
@@ -90,6 +97,9 @@ class CameraFragment : Fragment(),
             // Close the Gesture Recognizer helper and release resources
             backgroundExecutor.execute { gestureRecognizerHelper.clearGestureRecognizer() }
         }
+
+        // Stop the camera if it's running
+        stopCamera()
     }
 
     override fun onDestroyView() {
@@ -117,22 +127,24 @@ class CameraFragment : Fragment(),
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Initialize our background executor
+        backgroundExecutor = Executors.newSingleThreadExecutor()
+
         with(fragmentCameraBinding.recyclerviewResults) {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = gestureRecognizerResultAdapter
         }
 
-        // Initialize our background executor
-        backgroundExecutor = Executors.newSingleThreadExecutor()
-
         // Wait for the views to be properly laid out
         fragmentCameraBinding.viewFinder.post {
-            // Set up the camera and its use cases
-            setUpCamera()
+            // Set up the camera and its use cases only if the "Start" button has been clicked
+            if (isStartButtonClicked) {
+                startCamera()
+            }
         }
 
-        // Create the Hand Gesture Recognition Helper that will handle the
-        // inference
+        // Create the Hand Gesture Recognition Helper that will handle the inference
         backgroundExecutor.execute {
             gestureRecognizerHelper = GestureRecognizerHelper(
                 context = requireContext(),
@@ -235,6 +247,7 @@ class CameraFragment : Fragment(),
                     /* no op */
                 }
             }
+        
     }
 
     // Update the values displayed in the bottom sheet. Reset recognition
@@ -342,10 +355,6 @@ class CameraFragment : Fragment(),
             fragmentCameraBinding.viewFinder.display.rotation
     }
 
-    // Update UI after a hand gesture has been recognized. Extracts original
-    // image height/width to scale and place the landmarks properly through
-    // OverlayView. Only one result is expected at a time. If two or more
-    // hands are seen in the camera frame, only one will be processed.
     override fun onResults(
         resultBundle: GestureRecognizerHelper.ResultBundle
     ) {
@@ -389,5 +398,17 @@ class CameraFragment : Fragment(),
                 )
             }
         }
+    }
+
+    // Start the camera
+    private fun startCamera() {
+        isCameraRunning = true
+        setUpCamera()
+    }
+
+    // Stop the camera
+    private fun stopCamera() {
+        isCameraRunning = false
+        cameraProvider?.unbindAll()
     }
 }
