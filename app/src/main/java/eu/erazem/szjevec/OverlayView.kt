@@ -53,15 +53,17 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         results?.let { gestureRecognizerResult ->
             for (landmark in gestureRecognizerResult.landmarks()) {
                 for (normalizedLandmark in landmark) {
-                    val x = normalizedLandmark.x() * imageWidth * scaleFactor
+                    // Mirror the x-coordinate
+                    val x = (1 - normalizedLandmark.x()) * imageWidth * scaleFactor
                     val y = normalizedLandmark.y() * imageHeight * scaleFactor
                     canvas.drawPoint(x, y, pointPaint)
                 }
 
                 HandLandmarker.HAND_CONNECTIONS.forEach {
-                    val startX = gestureRecognizerResult.landmarks()[0][it!!.start()].x() * imageWidth * scaleFactor
+                    // Mirror the x-coordinates for lines
+                    val startX = (1 - gestureRecognizerResult.landmarks()[0][it!!.start()].x()) * imageWidth * scaleFactor
                     val startY = gestureRecognizerResult.landmarks()[0][it.start()].y() * imageHeight * scaleFactor
-                    val endX = gestureRecognizerResult.landmarks()[0][it.end()].x() * imageWidth * scaleFactor
+                    val endX = (1 - gestureRecognizerResult.landmarks()[0][it.end()].x()) * imageWidth * scaleFactor
                     val endY = gestureRecognizerResult.landmarks()[0][it.end()].y() * imageHeight * scaleFactor
 
                     canvas.drawLine(startX, startY, endX, endY, linePaint)
@@ -69,6 +71,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             }
         }
     }
+
 
 
 
