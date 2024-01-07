@@ -1,7 +1,6 @@
 package eu.erazem.szjevec
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -25,20 +24,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
 
-    init {
-        initPaints()
-    }
-
-    fun clear() {
-        results = null
-        linePaint.reset()
-        pointPaint.reset()
-        invalidate()
-        initPaints()
-    }
+    init { initPaints() }
 
     private fun initPaints() {
-        linePaint.color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
+        linePaint.color = ContextCompat.getColor(context!!, R.color.color_primary)
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
 
@@ -46,7 +35,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
     }
-
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
@@ -71,9 +59,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             }
         }
     }
-
-
-
 
     fun setResults(
         gestureRecognizerResult: GestureRecognizerResult,

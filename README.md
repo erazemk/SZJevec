@@ -54,3 +54,4 @@ While working on the project, we used many different sources:
 - https://mediapipe.readthedocs.io/en/latest/solutions/hands.html
 - https://github.com/googlesamples/mediapipe/tree/main/examples/gesture_recognizer/android
 - https://www.tensorflow.org/lite/android/quickstart
+- https://github.com/tensorflow/examples/tree/master/lite/examples/gesture_classification/android

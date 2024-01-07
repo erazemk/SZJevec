@@ -19,7 +19,6 @@ local.properties
 venv
 .venv
 dataset
-videos
 train
 *.npy
 *.keras

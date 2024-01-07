@@ -2,17 +2,18 @@ package eu.erazem.szjevec.fragment
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.mediapipe.tasks.components.containers.Category
-import eu.erazem.szjevec.databinding.ItemGestureRecognizerResultBinding
+import eu.erazem.szjevec.databinding.RecognizedGestureBinding
 import java.util.Locale
 import kotlin.math.min
 
 class GestureRecognizerResultsAdapter :
     RecyclerView.Adapter<GestureRecognizerResultsAdapter.ViewHolder>() {
     companion object {
-        private const val NO_VALUE = "--"
+        private const val NO_VALUE = "none"
     }
 
     private var adapterCategories: MutableList<Category?> = mutableListOf()
@@ -20,8 +21,12 @@ class GestureRecognizerResultsAdapter :
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateResults(categories: List<Category>?) {
-        adapterCategories = MutableList(adapterSize) { null }
-        if (categories != null) {
+        if (categories.isNullOrEmpty()) {
+            // Clear the list and notify the RecyclerView to update
+            adapterCategories.clear()
+            notifyDataSetChanged()
+        } else {
+            adapterCategories = MutableList(adapterSize) { null }
             val sortedCategories = categories.sortedByDescending { it.score() }
             val min = min(sortedCategories.size, adapterCategories.size)
             for (i in 0 until min) {
@@ -40,12 +45,17 @@ class GestureRecognizerResultsAdapter :
         parent: ViewGroup,
         viewType: Int
     ): ViewHolder {
-        val binding = ItemGestureRecognizerResultBinding.inflate(
+        val binding = RecognizedGestureBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
         return ViewHolder(binding)
+    }
+
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.binding.root.visibility = View.VISIBLE
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -56,17 +66,22 @@ class GestureRecognizerResultsAdapter :
 
     override fun getItemCount(): Int = adapterCategories.size
 
-    inner class ViewHolder(private val binding: ItemGestureRecognizerResultBinding) :
+    inner class ViewHolder(val binding: RecognizedGestureBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(label: String?, score: Float?) {
             with(binding) {
-                tvLabel.text = label ?: NO_VALUE
-                tvScore.text = if (score != null) String.format(
-                    Locale.US,
-                    "%.2f",
-                    score
-                ) else NO_VALUE
+                if (label == null || label == "none") {
+                    root.visibility = View.GONE
+                } else {
+                    root.visibility = View.VISIBLE
+                    tvLabel.text = label
+                    tvScore.text = if (score != null) String.format(
+                        Locale.US,
+                        "%.2f",
+                        score
+                    ) else NO_VALUE
+                }
             }
         }
     }
