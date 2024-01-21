@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SZJevec</string>
+    <string name="welcome">Welcome to SZJevec!</string>
+    <string name="instructions">Here is how the app works:\n\nPoint the camera towards the person signing. The app will translate the letter they are signing and also show the confidence level. You can also press the dictionary button on the right to see the signs of the Slovenian sign language alphabet.</string>
+</resources>
